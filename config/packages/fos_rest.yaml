@@ -1,0 +1,54 @@
+fos_rest:
+
+  body_converter:
+    enabled: true
+    validate: true
+    validation_errors_argument: violations
+
+  view:
+    formats: { json: true }
+    view_response_listener: true
+    mime_types:
+      json: [ 'application/json' ]
+
+  serializer:
+    serialize_null: true
+
+  format_listener:
+    enabled: true
+    rules:
+      - { path: '^/', priorities: ['json'], fallback_format: 'json' }
+
+  param_fetcher_listener: force
+
+  exception:
+    enabled: true
+    serializer_error_renderer: true
+    map_exception_codes: true
+    codes:
+      'App\Exception\ResourceValidationException': HTTP_BAD_REQUEST
+      'Symfony\Component\HttpKernel\Exception\NotFoundHttpException': HTTP_NOT_FOUND
+      'Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException': HTTP_METHOD_NOT_ALLOWED
+      'Symfony\Component\HttpKernel\Exception\BadRequestHttpException': HTTP_BAD_REQUEST
+      'Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException': HTTP_FORBIDDEN
+      'Exception': HTTP_INTERNAL_SERVER_ERROR
+    messages:
+      'App\Exception\ResourceValidationException': true
+      'Symfony\Component\HttpKernel\Exception\NotFoundHttpException': true
+      'Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException': true
+
+# Read the documentation: https://symfony.com/doc/master/bundles/FOSRestBundle/index.html
+#fos_rest:
+#    param_fetcher_listener:  true
+#    allowed_methods_listener:  true
+#    routing_loader: true
+#    view:
+#        view_response_listener:  true
+#    exception:
+#        codes:
+#            App\Exception\MyException: 403
+#        messages:
+#            App\Exception\MyException: Forbidden area.
+#    format_listener:
+#        rules:
+#            - { path: ^/api, prefer_extension: true, fallback_format: json, priorities: [ json, html ] }
