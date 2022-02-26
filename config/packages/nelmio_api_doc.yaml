@@ -1,0 +1,20 @@
+nelmio_api_doc:
+    documentation:
+        info:
+            title: BileMo
+            description: Private API to make available a catalog of mobile devices from the BileMo company
+            version: 1.0.0
+        
+        components:
+            securitySchemes:
+                Bearer:
+                    type: http
+                    scheme: bearer
+                    bearerFormat: JWT
+        
+        security:
+            - Bearer: []
+
+    areas: # to filter documented areas
+        path_patterns:
+            - ^/api(?!/doc(.json)?$) # Accepts routes under /api except /api/doc
