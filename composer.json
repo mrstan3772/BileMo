@@ -17,12 +17,18 @@
         "lexik/jwt-authentication-bundle": "^2.14",
         "nelmio/api-doc-bundle": "^4.8",
         "nelmio/cors-bundle": "^2.2",
+        "sensio/framework-extra-bundle": "^6.2",
         "symfony/console": "6.0.*",
         "symfony/dotenv": "6.0.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "6.0.*",
+        "symfony/options-resolver": "6.0.*",
+        "symfony/property-access": "6.0.*",
+        "symfony/property-info": "6.0.*",
         "symfony/runtime": "6.0.*",
+        "symfony/security-bundle": "6.0.*",
         "symfony/serializer": "6.0.*",
+        "symfony/validator": "6.0.*",
         "symfony/yaml": "6.0.*",
         "willdurand/hateoas-bundle": "^2.4"
     },
@@ -81,5 +87,7 @@
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "fakerphp/faker": "^1.19",
         "symfony/maker-bundle": "^1.38"
-    }
+    },
+    "name": "mrstan3772/BileMo",
+    "description": "Private API to make available a catalog of mobile devices from the BileMo company"
 }
