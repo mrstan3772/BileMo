@@ -18,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -51,5 +51,39 @@ class UserController extends AbstractFOSRestController
         }
 
         return $consumer;
+    }
+
+    #[Rest\Post(path: '/users', name: 'app_user_create')]
+    #[Rest\View(statusCode: 201, serializerGroups: ['read'])]
+    #[Security('is_granted("ROLE_ADMIN")', message: 'You are not authorized to create a new user')]
+    public function create(User $user, ConstraintViolationListInterface $violations, UserPasswordHasherInterface $hasher): View
+    {
+        if (count($violations)) {
+            $message = 'The JSON sent contains invalid data: ';
+            foreach ($violations as $violation) {
+                /** @var ConstraintViolationInterface $violation */
+                $message .= sprintf(
+                    'Field %s: %s; ',
+                    $violation->getPropertyPath(),
+                    $violation->getMessage()
+                );
+            }
+
+            throw new ResourceValidationException($message);
+        }
+
+        $user->setClient($this->getUser()->getClient());
+        $user->setPassword($hasher->hashPassword($user, $user->getPassword()))
+            ->setCreatedAt(new \DateTime());
+
+        $manager = $this->getDoctrine()->getManager();
+        $manager->persist($user);
+        $manager->flush();
+
+        return $this->view(
+            $user,
+            Response::HTTP_CREATED,
+            ['location' => $this->generateUrl('app_user_show', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
+        );
     }
 }
