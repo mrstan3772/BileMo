@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 
 #[Route('/api')]
-class PhoneController extends AbstractController
+class PhoneController extends AbstractFOSRestController
 {
 
     #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
