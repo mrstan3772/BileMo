@@ -6,6 +6,7 @@ use App\Entity\Traits\TimestampableTrait;
 use App\Repository\PhoneRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: PhoneRepository::class)]
 class Phone
@@ -18,18 +19,50 @@ class Phone
     private int $id;
 
     #[ORM\Column(type: 'string', length: 45)]
+    #[Assert\NotBlank(
+        message: 'The name cannot be blank',
+    )]
+    #[Assert\Length(
+        max: 45,
+        message: 'The name cannot exceed {{ limit }} characters',
+    )]
     private string $name;
 
     #[ORM\Column(type: 'string', length: 40)]
+    #[Assert\NotBlank(
+        message: 'The reference cannot be blank',
+    )]
+    #[Assert\Length(
+        max: 40,
+        message: 'The reference cannot exceed {{ limit }} characters',
+    )]
     private $reference;
 
     #[ORM\Column(type: 'string', length: 60)]
+    #[Assert\NotBlank(
+        message: 'The brand cannot be blank',
+    )]
+    #[Assert\Length(
+        max: 60,
+        message: 'The brand cannot exceed {{ limit }} characters',
+    )]
     private string $brand;
 
     #[ORM\Column(type: 'float', nullable: true)]
+    #[Assert\Type(
+        type: ['float', 'int'],
+        message: 'The price should be a valid number',
+    )]
+    #[Assert\Positive(
+        message: 'The price should be positive and greater than 0',
+    )]
     private ?float $price;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Assert\Length(
+        max: 2500,
+        message: 'The description cannot exceed {{ limit }} characters',
+    )]
     private ?string $description;
 
     public function __construct()
