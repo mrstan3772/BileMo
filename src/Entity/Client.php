@@ -9,6 +9,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use JMS\Serializer\Annotation as Serializer;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: ClientRepository::class)]
 class Client
@@ -18,6 +21,7 @@ class Client
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[OA\Property(description: 'The client name')]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 50)]
@@ -27,6 +31,10 @@ class Client
     #[Assert\Length(
         max: 50,
         message: 'The name cannot exceed {{ limit }} characters',
+    )]
+    #[OA\Property(
+        ref: new Model(type: User::class),
+        description: 'Users linked to the client',
     )]
     private string $name;
 
