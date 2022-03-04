@@ -10,10 +10,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/api')]
-#[Rest\Post('/login', name: 'app_login')]
 class SecurityController extends AbstractController
 {
-    
+    #[Rest\Post('/login', name: 'app_login')]
     public function login(): void
     {
         throw new LogicException('This method can be blank - it will be intercepted by the login key in the firewall');
