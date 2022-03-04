@@ -16,6 +16,18 @@ use Symfony\Contracts\Cache\CacheInterface;
 #[Route('/api')]
 class PhoneController extends AbstractController
 {
+
+    #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
+    #[Rest\View(serializerGroups: ['read'])]
+    public function show(Phone $phone = null): Phone
+    {
+        if (!$phone) {
+            throw new NotFoundHttpException('The phone you searched for does not exist');
+        }
+
+        return $phone;
+    }
+
     #[Rest\Get(path: '/phones', name: 'app_phone_list')]
     #[Rest\QueryParam(name: 'keyword', requirements: '\w+', nullable: true, description: 'The name of the phone to be searched')]
     #[Rest\QueryParam(name: 'order', requirements: 'asc|desc', default: 'asc', description: 'Sort order by phone name (asc or desc)')]
