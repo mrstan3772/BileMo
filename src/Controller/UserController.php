@@ -40,4 +40,16 @@ class UserController extends AbstractFOSRestController
 
         return $appCache->get($cacheKey, fn() => $userRepository->search($client, ...$params)->getCurrentPageResults());
     }
+
+    #[Rest\Get(path: '/users/{id}', name: 'app_user_show')]
+    #[Rest\View(serializerGroups: ['read'])]
+    #[Security('is_granted("MANAGE", consumer)', message: 'You are not authorized to access this user')]
+    public function show(User $consumer = null): User
+    {
+        if (!$consumer) {
+            throw new NotFoundHttpException('The user you searched for does not exist');
+        }
+
+        return $consumer;
+    }
 }
