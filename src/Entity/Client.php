@@ -21,7 +21,7 @@ class Client
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
-    #[OA\Property(description: 'The client name')]
+    #[OA\Property(description: 'The unique identifier of the client')]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 50)]
@@ -32,13 +32,14 @@ class Client
         max: 50,
         message: 'The name cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The client name')]
+    private string $name;
+
+    #[ORM\OneToMany(mappedBy: 'clientId', targetEntity: User::class, orphanRemoval: true)]
     #[OA\Property(
         ref: new Model(type: User::class),
         description: 'Users linked to the client',
     )]
-    private string $name;
-
-    #[ORM\OneToMany(mappedBy: 'clientId', targetEntity: User::class, orphanRemoval: true)]
     private Collection $users;
 
     public function __construct()
