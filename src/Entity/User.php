@@ -7,8 +7,30 @@ use Doctrine\ORM\Mapping as ORM;
 use App\Validator\UniqueEmail;
 use App\Entity\Traits\TimestampableTrait;
 use Symfony\Component\Validator\Constraints as Assert;
+use Hateoas\Configuration\Annotation as Hateoas;
+use OpenApi\Attributes as OA;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[Hateoas\Relation(
+    'self', 
+    href: new Hateoas\Route('app_phone_show', parameters: ['id" = "expr(object.getId())'], absolute: true),
+    exclusion: new Hateoas\Exclusion(groups: ['read'])
+)]
+#[Hateoas\Relation(
+    'create', 
+    href: new Hateoas\Route('app_user_create', absolute: true),
+    exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
+)]
+#[Hateoas\Relation(
+    'delete', 
+    href: new Hateoas\Route('app_user_delete', parameters: ['id' => 'expr(object.getId())'], absolute: true),
+    exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
+)]
+#[Hateoas\Relation(
+    'client', 
+    embedded: new Hateoas\Embedded('expr(object.getClient())'),
+    exclusion: new Hateoas\Exclusion(groups: ['read'])
+)]
 class User
 {
     public const ROLES = [

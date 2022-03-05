@@ -7,8 +7,15 @@ use App\Repository\PhoneRepository;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use OpenApi\Attributes as OA;
+use Hateoas\Configuration\Annotation as Hateoas;
 
 #[ORM\Entity(repositoryClass: PhoneRepository::class)]
+#[Hateoas\Relation(
+    'self', 
+    href: new Hateoas\Route('app_phone_show', parameters: ['id" = "expr(object.getId())'], absolute: true),
+    exclusion: new Hateoas\Exclusion(groups: ['read'])
+)]
 class Phone
 {
     use TimestampableTrait;
@@ -16,6 +23,7 @@ class Phone
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[OA\Property(description: 'The unique identifier of the phone')]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 45)]
