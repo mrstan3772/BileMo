@@ -86,4 +86,17 @@ class UserController extends AbstractFOSRestController
             ['location' => $this->generateUrl('app_user_show', ['id' => $user->getId()], UrlGeneratorInterface::ABSOLUTE_URL)]
         );
     }
+
+    #[Rest\Delete(path: '/users/{id}', name: 'app_user_delete', requirements: ['id' => '\d+'])]
+    #[Rest\View(statusCode: 204)]
+    #[Security('is_granted("ROLE_ADMIN") and is_granted("MANAGE", consumer)', message: 'You are not authorized to create a new user')]
+    public function delete(EntityManagerInterface $manager, User $consumer = null): void
+    {
+        if (!$consumer) {
+            throw new NotFoundHttpException('The user you searched for does not exist');
+        }
+
+        $manager->remove($consumer);
+        $manager->flush();
+    }
 }
