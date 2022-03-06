@@ -34,6 +34,7 @@ class Phone
         max: 45,
         message: 'The name cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The phone name')]
     private string $name;
 
     #[ORM\Column(type: 'string', length: 40)]
@@ -44,6 +45,7 @@ class Phone
         max: 40,
         message: 'The reference cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The phone reference')]
     private $reference;
 
     #[ORM\Column(type: 'string', length: 60)]
@@ -54,6 +56,7 @@ class Phone
         max: 60,
         message: 'The brand cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The phone brand name')]
     private string $brand;
 
     #[ORM\Column(type: 'float', nullable: true)]
@@ -64,6 +67,11 @@ class Phone
     #[Assert\Positive(
         message: 'The price should be positive and greater than 0',
     )]
+    #[OA\Property(
+        type: 'number',
+        format: 'float',
+        description: 'The price of the phone in euro',
+    )]
     private ?float $price;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -71,6 +79,7 @@ class Phone
         max: 2500,
         message: 'The description cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The phone description')]
     private ?string $description;
 
     public function __construct()

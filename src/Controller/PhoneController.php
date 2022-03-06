@@ -14,10 +14,27 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
 
 #[Route('/api')]
+#[OA\Response(response: 405, description: 'Method not allowed')]
+#[OA\Response(response: 401, description: 'Invalid, not found or expired JWT token')]
+#[OA\Tag(name: 'Phone')]
 class PhoneController extends AbstractFOSRestController
 {
     #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
     #[Rest\View(serializerGroups: ['read'])]
+    #[OA\Response(
+        response: 200, 
+        description: 'Returns the phone according to his id', 
+        ref: new Model(type: Phone::class, groups: ['read'])
+    )]
+    #[OA\Response(
+        response: 404, 
+        description: 'Phone not found', 
+    )]    
+    /**
+     * @param  Phone|null $phone
+     * 
+     * @return Phone
+     */
     public function show(Phone $phone = null): Phone
     {
         if (!$phone) {
@@ -33,6 +50,20 @@ class PhoneController extends AbstractFOSRestController
     #[Rest\QueryParam(name: 'limit', requirements: '\d+', default: '10', description: 'Max number of phones per page')]
     #[Rest\QueryParam(name: 'offset', requirements: '\d+', default: '0', description: 'The pagination offset')]
     #[Rest\View(serializerGroups: ['read'])]
+    #[OA\Response(
+        response: 200, 
+        description: 'Returns a list of phones',
+        ref: new Model(type: Phone::class, groups: ['read']) 
+    )]        
+    /**
+     * @param  PhoneRepository $phoneRepository
+     * @param  ParamFetcherInterface $paramFetcher
+     * @param  CacheInterface $appCache
+     * 
+     * @return iterable
+     * 
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function list(PhoneRepository $phoneRepository, ParamFetcherInterface $paramFetcher, CacheInterface $appCache): iterable
     {
         $params = array_values($paramFetcher->all());
