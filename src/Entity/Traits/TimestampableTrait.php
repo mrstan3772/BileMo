@@ -10,28 +10,22 @@ use OpenApi\Annotations as OA;
 
 trait TimestampableTrait
 {
-    /**
-     * @ORM\Column(type="datetime")
-     *
-     * @Serializer\Groups({"read"})
-     * @OA\Property(
-     *     type = "string",
-     *     format = "date-time",
-     *     description = "The creation date of the resource"
-     * )
-     */
+    #[ORM\Column(type: 'datetime')]
+    #[Serializer\Groups(['read'])]
+    #[OA\Property(
+        type: 'string',
+        format: 'date-time',
+        description: 'The creation date of the resource',
+    )]
     private DateTimeInterface $createdAt;
 
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     *
-     * @Serializer\Groups({"read"})
-     * @OA\Property(
-     *     type = "string",
-     *     format = "date-time",
-     *     description = "The date of the last update of the resource"
-     * )
-     */
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    #[Serializer\Groups(['read'])]
+    #[OA\Property(
+        type: 'string',
+        format: 'date-time',
+        description: 'The date of the last update of the resource',
+    )]
     private ?DateTimeInterface $updatedAt = null;
 
     /**

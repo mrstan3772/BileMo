@@ -33,6 +33,7 @@ class Client
         message: 'The name cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The client name')]
+    #[Serializer\Groups(['read'])]
     private string $name;
 
     #[ORM\OneToMany(mappedBy: 'clientId', targetEntity: User::class, orphanRemoval: true)]
