@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use OpenApi\Attributes as OA;
 use Hateoas\Configuration\Annotation as Hateoas;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: PhoneRepository::class)]
 #[Hateoas\Relation(
@@ -24,6 +25,7 @@ class Phone
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     #[OA\Property(description: 'The unique identifier of the phone')]
+    #[Serializer\Groups(['read'])]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 45)]
@@ -35,6 +37,7 @@ class Phone
         message: 'The name cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The phone name')]
+    #[Serializer\Groups(['read'])]
     private string $name;
 
     #[ORM\Column(type: 'string', length: 40)]
@@ -46,6 +49,7 @@ class Phone
         message: 'The reference cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The phone reference')]
+    #[Serializer\Groups(['read'])]
     private $reference;
 
     #[ORM\Column(type: 'string', length: 60)]
@@ -57,6 +61,7 @@ class Phone
         message: 'The brand cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The phone brand name')]
+    #[Serializer\Groups(['read'])]
     private string $brand;
 
     #[ORM\Column(type: 'float', nullable: true)]
@@ -72,6 +77,7 @@ class Phone
         format: 'float',
         description: 'The price of the phone in euro',
     )]
+    #[Serializer\Groups(['read'])]
     private ?float $price;
 
     #[ORM\Column(type: 'text', nullable: true)]
@@ -80,6 +86,7 @@ class Phone
         message: 'The description cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The phone description')]
+    #[Serializer\Groups(['read'])]
     private ?string $description;
 
     public function __construct()

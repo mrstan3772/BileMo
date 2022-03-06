@@ -11,6 +11,7 @@ use Hateoas\Configuration\Annotation as Hateoas;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\Items;
 use OpenApi\Examples\UsingRefs\Model;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[Hateoas\Relation(
@@ -46,6 +47,7 @@ class User
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
     #[OA\Property(description: 'The unique identifier of the user')]
+    #[Serializer\Groups(['read'])]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
@@ -61,6 +63,7 @@ class User
         groups: ['create'],
     )]
     #[OA\Property(description: 'The user email')]
+    #[Serializer\Groups(['create', 'read'])]
     private string $email;
 
     #[ORM\Column(type: 'json')]
@@ -83,6 +86,8 @@ class User
             title: 'role',
         )
     )]
+    #[Serializer\Groups(['create', 'read'])]
+    #[Serializer\Groups(['array'])]
     private array $roles = [];
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -100,6 +105,7 @@ class User
         format: 'password',
         description: 'The user email',
     )]
+    #[Serializer\Groups(['create'])]
     private string $password;
 
     #[ORM\Column(type: 'integer', nullable: true)]
@@ -114,6 +120,7 @@ class User
         message: 'The phone number cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The user phone number')]
+    #[Serializer\Groups(['create', 'read'])]
     private ?int $phoneNumber;
 
     #[ORM\Column(type: 'string', length: 90)]
@@ -127,6 +134,7 @@ class User
         message: 'The fullname cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The user\'s full name')]
+    #[Serializer\Groups(['create', 'read'])]
     private $fullname;
 
     #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'users', fetch: 'EAGER')]
@@ -135,6 +143,8 @@ class User
         ref: new Model(type: Client::class),
         description: 'Client linked to the user'
     )]
+    #[Serializer\Exclude()]
+    #[Serializer\Groups(['read'])]
     private int|Client $client;
 
     public function getId(): ?int
