@@ -9,25 +9,27 @@ use App\Entity\Traits\TimestampableTrait;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\Items;
+use OpenApi\Examples\UsingRefs\Model;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[Hateoas\Relation(
-    'self', 
+    'self',
     href: new Hateoas\Route('app_phone_show', parameters: ['id" = "expr(object.getId())'], absolute: true),
     exclusion: new Hateoas\Exclusion(groups: ['read'])
 )]
 #[Hateoas\Relation(
-    'create', 
+    'create',
     href: new Hateoas\Route('app_user_create', absolute: true),
     exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
 )]
 #[Hateoas\Relation(
-    'delete', 
+    'delete',
     href: new Hateoas\Route('app_user_delete', parameters: ['id' => 'expr(object.getId())'], absolute: true),
     exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
 )]
 #[Hateoas\Relation(
-    'client', 
+    'client',
     embedded: new Hateoas\Embedded('expr(object.getClient())'),
     exclusion: new Hateoas\Exclusion(groups: ['read'])
 )]
@@ -43,6 +45,7 @@ class User
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
+    #[OA\Property(description: 'The unique identifier of the user')]
     private int $id;
 
     #[ORM\Column(type: 'string', length: 255, unique: true)]
@@ -56,7 +59,8 @@ class User
     )]
     #[UniqueEmail(
         groups: ['create'],
-    )] 
+    )]
+    #[OA\Property(description: 'The user email')]
     private string $email;
 
     #[ORM\Column(type: 'json')]
@@ -71,6 +75,14 @@ class User
             message: 'You must provid a valid user role. Roles available: {{ choices }}'
         )
     )]
+    #[OA\Property(
+        type: 'array',
+        description: 'The roles of the user giving permissions',
+        items: new Items(
+            type: 'string',
+            title: 'role',
+        )
+    )]
     private array $roles = [];
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -82,6 +94,11 @@ class User
         groups: ['create'],
         pattern: '/^(?=.*[a-zà-ÿ])(?=.*[A-ZÀ-Ý])(?=.*[0-9])(?=.*[^a-zà-ÿA-ZÀ-Ý0-9]).{12,}/',
         message: 'For security reasons, your password must contain at least 12 characters, including 1 lowercase letter, 1 uppercase letter, 1 number and a special character (random order)',
+    )]
+    #[OA\Property(
+        type: 'string',
+        format: 'password',
+        description: 'The user email',
     )]
     private string $password;
 
@@ -96,6 +113,7 @@ class User
         max: 15,
         message: 'The phone number cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The user phone number')]
     private ?int $phoneNumber;
 
     #[ORM\Column(type: 'string', length: 90)]
@@ -108,10 +126,15 @@ class User
         max: 90,
         message: 'The fullname cannot exceed {{ limit }} characters',
     )]
+    #[OA\Property(description: 'The user\'s full name')]
     private $fullname;
 
     #[ORM\ManyToOne(targetEntity: Client::class, inversedBy: 'users', fetch: 'EAGER')]
     #[ORM\JoinColumn(nullable: false)]
+    #[OA\Property(
+        ref: new Model(type: Client::class),
+        description: 'Client linked to the user'
+    )]
     private int|Client $client;
 
     public function getId(): ?int

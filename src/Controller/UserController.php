@@ -12,6 +12,7 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 use FOS\RestBundle\View\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\MediaType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,6 +25,9 @@ use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 
 #[Route('/api')]
+#[OA\Response(response: 405, description: 'Method not allowed')]
+#[OA\Response(response: 401, description: 'Invalid, not found or expired JWT token')]
+#[OA\Tag(name: 'User')]
 class UserController extends AbstractFOSRestController
 {
     #[Rest\Get(path: '/users', name: 'app_user_list')]
@@ -32,6 +36,20 @@ class UserController extends AbstractFOSRestController
     #[Rest\QueryParam(name: 'limit', requirements: '\d+', default: '10', description: 'Max number of users per page')]
     #[Rest\QueryParam(name: 'offset', requirements: '\d+', default: '0', description: 'The pagination offset')]
     #[Rest\View(serializerGroups: ['read'])]
+    #[OA\Response(
+        response: 200, 
+        description: 'Returns a list of users according to the client id',
+        ref: new Model(type: User::class, groups: ['read'])
+    )]     
+    /**
+     * @param  UserRepository $userRepository
+     * @param  ParamFetcherInterface $paramFetcherInterface
+     * @param  CacheInterface $appCache
+     * 
+     * @return iterable
+     * 
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
     public function list(UserRepository $userRepository, ParamFetcherInterface $paramFetcherInterface, CacheInterface $appCache): iterable
     {
         $client = $this->getUser()->getClient();
@@ -44,6 +62,20 @@ class UserController extends AbstractFOSRestController
     #[Rest\Get(path: '/users/{id}', name: 'app_user_show')]
     #[Rest\View(serializerGroups: ['read'])]
     #[Security('is_granted("MANAGE", consumer)', message: 'You are not authorized to access this user')]
+    #[OA\Response(
+        response: 200, 
+        description: 'Returns the user according to his id',
+        ref: new Model(type: User::class, groups: ['read'])
+    )]
+    #[OA\Response(
+        response: 404, 
+        description: 'User not found',
+    )]    
+    /**
+     * @param  User|null $consumer
+     * 
+     * @return User
+     */
     public function show(User $consumer = null): User
     {
         if (!$consumer) {
@@ -56,6 +88,59 @@ class UserController extends AbstractFOSRestController
     #[Rest\Post(path: '/users', name: 'app_user_create')]
     #[Rest\View(statusCode: 201, serializerGroups: ['read'])]
     #[Security('is_granted("ROLE_ADMIN")', message: 'You are not authorized to create a new user')]
+    #[OA\Response(
+        response: 201, 
+        description: 'Returns the user added',
+        ref: new Model(type: User::class, groups: ['read'])
+    )]
+    #[OA\Response(
+        response: 403, 
+        description: 'Insufficient rights to create a user',
+    )]
+    #[OA\Response(
+        response: 400, 
+        description: 'Malformed JSON or constraint validation errors',
+    )]
+    #[OA\RequestBody(
+        new MediaType(
+            mediaType: 'application/json',
+            schema: new OA\Schema(
+                properties: [
+                    new OA\Property(
+                        property: 'email',
+                        description: 'The user\'s email',
+                        type: 'string',
+                    ),
+                    new OA\Property(
+                        property: 'password',
+                        description: 'The user\'s password',
+                        type: 'string',
+                        format: 'password'
+                    ),
+                    new OA\Property(
+                        property: 'phoneNumber',
+                        description: 'The user\'s full phone number',
+                        type: 'int',
+                    ),
+                    new OA\Property(
+                        property: 'fullname',
+                        description: 'The user\'s full name',
+                        type: 'string',
+                    ),
+                    new OA\Property(
+                        property: 'roles',
+                        description: 'The user\'s full roles',
+                        type: 'array',
+                        items: new OA\Items( 
+                            type: 'string',
+                            title: 'role'
+                        )
+                    ),
+                ]
+            ),
+        ),
+        description: 'User information"'
+    )]
     public function create(User $user, ConstraintViolationListInterface $violations, UserPasswordHasherInterface $hasher): View
     {
         if (count($violations)) {
@@ -90,6 +175,18 @@ class UserController extends AbstractFOSRestController
     #[Rest\Delete(path: '/users/{id}', name: 'app_user_delete', requirements: ['id' => '\d+'])]
     #[Rest\View(statusCode: 204)]
     #[Security('is_granted("ROLE_ADMIN") and is_granted("MANAGE", consumer)', message: 'You are not authorized to create a new user')]
+    #[OA\Response(
+        response: 204, 
+        description: 'No content',
+    )]
+    #[OA\Response(
+        response: 404, 
+        description: 'User not found',
+    )]
+    #[OA\Response(
+        response: 403, 
+        description: 'Different common client or insufficient rights to delete a user',
+    )]
     public function delete(EntityManagerInterface $manager, User $consumer = null): void
     {
         if (!$consumer) {
