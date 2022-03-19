@@ -17,6 +17,7 @@
         "lexik/jwt-authentication-bundle": "^2.14",
         "nelmio/api-doc-bundle": "^4.8",
         "nelmio/cors-bundle": "^2.2",
+        "pagerfanta/doctrine-orm-adapter": "^3.6",
         "sensio/framework-extra-bundle": "^6.2",
         "symfony/console": "6.0.*",
         "symfony/dotenv": "6.0.*",
@@ -86,8 +87,7 @@
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "fakerphp/faker": "^1.19",
-        "symfony/maker-bundle": "^1.38"
-    },
-    "name": "mrstan3772/BileMo",
-    "description": "Private API to make available a catalog of mobile devices from the BileMo company"
+        "symfony/maker-bundle": "^1.38",
+        "zenstruck/foundry": "^1.16"
+    }
 }

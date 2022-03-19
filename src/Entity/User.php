@@ -6,14 +6,19 @@ use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
 use App\Validator\UniqueEmail;
 use App\Entity\Traits\TimestampableTrait;
+use DateTime;
 use Symfony\Component\Validator\Constraints as Assert;
 use Hateoas\Configuration\Annotation as Hateoas;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\Items;
 use OpenApi\Examples\UsingRefs\Model;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
+#[UniqueEntity(fields: ['email'], groups: ['create'])]
 #[Hateoas\Relation(
     'self',
     href: new Hateoas\Route('app_phone_show', parameters: ['id" = "expr(object.getId())'], absolute: true),
@@ -34,7 +39,7 @@ use JMS\Serializer\Annotation as Serializer;
     embedded: new Hateoas\Embedded('expr(object.getClient())'),
     exclusion: new Hateoas\Exclusion(groups: ['read'])
 )]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLES = [
         'ROLE_USER',
@@ -58,9 +63,6 @@ class User
     #[Assert\Email(
         groups: ['create'],
         message: 'The email {{ value }} is not a valid email address',
-    )]
-    #[UniqueEmail(
-        groups: ['create'],
     )]
     #[OA\Property(description: 'The user email')]
     #[Serializer\Groups(['create', 'read'])]
@@ -87,7 +89,7 @@ class User
         )
     )]
     #[Serializer\Groups(['create', 'read'])]
-    #[Serializer\Groups(['array'])]
+    #[Serializer\Type('array')]
     private array $roles = [];
 
     #[ORM\Column(type: 'string', length: 255)]
@@ -108,20 +110,21 @@ class User
     #[Serializer\Groups(['create'])]
     private string $password;
 
-    #[ORM\Column(type: 'integer', nullable: true)]
+    #[ORM\Column(type: 'integer', length: 15, nullable: true)]
     #[Assert\Type(
         groups: ['create'],
-        type: ['int'],
+        type: 'integer',
         message: 'The phone number should be a valid number',
     )]
     #[Assert\Length(
         groups: ['create'],
         max: 15,
-        message: 'The phone number cannot exceed {{ limit }} characters',
+        maxMessage: 'The phone number cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The user phone number')]
     #[Serializer\Groups(['create', 'read'])]
-    private ?int $phoneNumber;
+    #[Serializer\Type('int')]
+    private ?int $phoneNumber = null;
 
     #[ORM\Column(type: 'string', length: 90)]
     #[Assert\NotBlank(
@@ -131,7 +134,7 @@ class User
     #[Assert\Length(
         groups: ['create'],
         max: 90,
-        message: 'The fullname cannot exceed {{ limit }} characters',
+        maxMessage: 'The fullname cannot exceed {{ limit }} characters',
     )]
     #[OA\Property(description: 'The user\'s full name')]
     #[Serializer\Groups(['create', 'read'])]
@@ -146,6 +149,14 @@ class User
     #[Serializer\Exclude()]
     #[Serializer\Groups(['read'])]
     private int|Client $client;
+
+    private $plainPassword;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTime();
+        $this->plainPassword = null;
+    }
 
     public function getId(): ?int
     {
@@ -164,16 +175,52 @@ class User
         return $this;
     }
 
-    public function getRoles(): ?array
+    public function getRoles(): array
     {
-        return $this->roles;
+        $roles = $this->roles;
+
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
     }
+
 
     public function setRoles(array $roles): self
     {
         $this->roles = $roles;
 
         return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(string $plainPassword): self
+    {
+        $this->plainPassword = $plainPassword;
+        return $this;
+    }
+
+    /**
+     * The public representation of the user (e.g. a username, an email address, etc.)
+     *
+     * @see UserInterface
+     */
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    public function getSalt(): ?string
+    {
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        $this->plainPassword = null;
     }
 
     public function getPassword(): ?string
@@ -188,12 +235,12 @@ class User
         return $this;
     }
 
-    public function getPhoneNumber(): ?int
+    public function getPhoneNumber(): int
     {
         return $this->phoneNumber;
     }
 
-    public function setPhoneNumber(?int $phoneNumber): self
+    public function setPhoneNumber(int $phoneNumber): self
     {
         $this->phoneNumber = $phoneNumber;
 
