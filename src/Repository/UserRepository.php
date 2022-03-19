@@ -2,11 +2,14 @@
 
 namespace App\Repository;
 
+use App\Entity\Client;
 use App\Entity\User;
+use App\Service\PaginationHelper;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
+use Pagerfanta\Pagerfanta;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,7 +19,7 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class UserRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    public function __construct(ManagerRegistry $registry, private PaginationHelper $paginationHelper)
     {
         parent::__construct($registry, User::class);
     }
@@ -31,6 +34,22 @@ class UserRepository extends ServiceEntityRepository
         if ($flush) {
             $this->_em->flush();
         }
+    }
+
+    public function search(Client $client, ?string $term, string $order, int $limit = 10, int $offset = 0): Pagerfanta
+    {
+        $qb = $this->createQueryBuilder('u')
+            ->select('u')
+            ->andWhere('u.client = :client')
+            ->setParameter('client', $client)
+            ->orderBy('u.fullname', $order);
+
+        if ($term) {
+            $qb->andWhere('u.fullname LIKE ?1')
+                ->setParameter(1, '%' . $term . '%');
+        }
+
+        return $this->paginationHelper->paginate($qb, $limit, $offset);
     }
 
     /**

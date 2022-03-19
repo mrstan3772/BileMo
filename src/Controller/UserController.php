@@ -37,10 +37,10 @@ class UserController extends AbstractFOSRestController
     #[Rest\QueryParam(name: 'offset', requirements: '\d+', default: '0', description: 'The pagination offset')]
     #[Rest\View(serializerGroups: ['read'])]
     #[OA\Response(
-        response: 200, 
+        response: 200,
         description: 'Returns a list of users according to the client id',
         ref: new Model(type: User::class, groups: ['read'])
-    )]     
+    )]
     /**
      * @param  UserRepository $userRepository
      * @param  ParamFetcherInterface $paramFetcherInterface
@@ -50,27 +50,27 @@ class UserController extends AbstractFOSRestController
      * 
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function list(UserRepository $userRepository, ParamFetcherInterface $paramFetcherInterface, CacheInterface $appCache): iterable
+    public function list(UserRepository $userRepository, ParamFetcherInterface $paramFetcher, CacheInterface $appCache): iterable
     {
         $client = $this->getUser()->getClient();
         $params = array_values($paramFetcher->all());
         $cacheKey = 'users_' . md5($client->getId() . implode('', $params));
 
-        return $appCache->get($cacheKey, fn() => $userRepository->search($client, ...$params)->getCurrentPageResults());
+        return $appCache->get($cacheKey, fn () => $userRepository->search($client, ...$params)->getCurrentPageResults());
     }
 
     #[Rest\Get(path: '/users/{id}', name: 'app_user_show')]
     #[Rest\View(serializerGroups: ['read'])]
     #[Security('is_granted("MANAGE", consumer)', message: 'You are not authorized to access this user')]
     #[OA\Response(
-        response: 200, 
+        response: 200,
         description: 'Returns the user according to his id',
         ref: new Model(type: User::class, groups: ['read'])
     )]
     #[OA\Response(
-        response: 404, 
+        response: 404,
         description: 'User not found',
-    )]    
+    )]
     /**
      * @param  User|null $consumer
      * 
@@ -88,17 +88,26 @@ class UserController extends AbstractFOSRestController
     #[Rest\Post(path: '/users', name: 'app_user_create')]
     #[Rest\View(statusCode: 201, serializerGroups: ['read'])]
     #[Security('is_granted("ROLE_ADMIN")', message: 'You are not authorized to create a new user')]
+    #[ParamConverter(
+        'user',
+        class: 'App\Entity\User',
+        converter: 'fos_rest.request_body',
+        options: [
+            'validator' => ['groups' => 'create'],
+            'deserializationContext' => ['groups' => ['create']]
+        ]
+    )]
     #[OA\Response(
-        response: 201, 
+        response: 201,
         description: 'Returns the user added',
         ref: new Model(type: User::class, groups: ['read'])
     )]
     #[OA\Response(
-        response: 403, 
+        response: 403,
         description: 'Insufficient rights to create a user',
     )]
     #[OA\Response(
-        response: 400, 
+        response: 400,
         description: 'Malformed JSON or constraint validation errors',
     )]
     #[OA\RequestBody(
@@ -131,7 +140,7 @@ class UserController extends AbstractFOSRestController
                         property: 'roles',
                         description: 'The user\'s full roles',
                         type: 'array',
-                        items: new OA\Items( 
+                        items: new OA\Items(
                             type: 'string',
                             title: 'role'
                         )
@@ -141,7 +150,7 @@ class UserController extends AbstractFOSRestController
         ),
         description: 'User information"'
     )]
-    public function create(User $user, ConstraintViolationListInterface $violations, UserPasswordHasherInterface $hasher): View
+    public function create(EntityManagerInterface $manager, User $user, ConstraintViolationListInterface $violations, UserPasswordHasherInterface $hasher): View
     {
         if (count($violations)) {
             $message = 'The JSON sent contains invalid data: ';
@@ -161,7 +170,6 @@ class UserController extends AbstractFOSRestController
         $user->setPassword($hasher->hashPassword($user, $user->getPassword()))
             ->setCreatedAt(new \DateTime());
 
-        $manager = $this->getDoctrine()->getManager();
         $manager->persist($user);
         $manager->flush();
 
@@ -176,15 +184,15 @@ class UserController extends AbstractFOSRestController
     #[Rest\View(statusCode: 204)]
     #[Security('is_granted("ROLE_ADMIN") and is_granted("MANAGE", consumer)', message: 'You are not authorized to create a new user')]
     #[OA\Response(
-        response: 204, 
+        response: 204,
         description: 'No content',
     )]
     #[OA\Response(
-        response: 404, 
+        response: 404,
         description: 'User not found',
     )]
     #[OA\Response(
-        response: 403, 
+        response: 403,
         description: 'Different common client or insufficient rights to delete a user',
     )]
     public function delete(EntityManagerInterface $manager, User $consumer = null): void
