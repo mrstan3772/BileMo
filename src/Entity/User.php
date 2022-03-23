@@ -144,7 +144,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\JoinColumn(nullable: false)]
     #[OA\Property(
         ref: new Model(type: Client::class),
-        description: 'Client linked to the user'
+        description: 'Client linked to the user',
     )]
     #[Serializer\Exclude()]
     #[Serializer\Groups(['read'])]

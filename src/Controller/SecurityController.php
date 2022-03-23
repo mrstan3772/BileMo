@@ -32,24 +32,26 @@ class SecurityController extends AbstractController
         description: 'Invalid credentials"',
     )]
     #[OA\RequestBody(
-        new MediaType(
-            mediaType: 'application/json',
-            schema: new OA\Schema(
-                properties: [
-                    new OA\Property(
-                        property: 'email',
-                        description: 'The user\'s email',
-                        type: 'string',
-                    ),
-                    new OA\Property(
-                        property: 'password',
-                        description: 'The user\'s password',
-                        type: 'password',
-                    ),
-                ]
-            ),
-        ),
-        description: 'User credentials"'
+        description: 'User credentials',
+        content: [
+            new MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(
+                            property: 'email',
+                            description: 'The user\'s email',
+                            type: 'string',
+                        ),
+                        new OA\Property(
+                            property: 'password',
+                            description: 'The user\'s password',
+                            type: 'password',
+                        ),
+                    ]
+                ),
+            )
+        ]
     )]
     public function login(): void
     {
