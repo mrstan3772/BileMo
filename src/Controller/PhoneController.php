@@ -9,6 +9,7 @@ use FOS\RestBundle\Controller\Annotations as Rest;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
+use OpenApi\Attributes\Schema;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -22,14 +23,14 @@ class PhoneController extends AbstractFOSRestController
     #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
     #[Rest\View(serializerGroups: ['read'])]
     #[OA\Response(
-        response: 200, 
-        description: 'Returns the phone according to his id', 
-        ref: new Model(type: Phone::class, groups: ['read'])
+        // new OA\Schema(ref: new Model(type: Phone::class, groups: ['read'])),
+        response: 200,
+        description: 'Returns the phone according to his id',
     )]
     #[OA\Response(
-        response: 404, 
-        description: 'Phone not found', 
-    )]    
+        response: 404,
+        description: 'Phone not found',
+    )]
     /**
      * @param  Phone|null $phone
      * 
@@ -51,10 +52,10 @@ class PhoneController extends AbstractFOSRestController
     #[Rest\QueryParam(name: 'offset', requirements: '\d+', default: '0', description: 'The pagination offset')]
     #[Rest\View(serializerGroups: ['read'])]
     #[OA\Response(
-        response: 200, 
+        // new OA\Schema(ref: new Model(type: Phone::class, groups: ['read'])),
+        response: 200,
         description: 'Returns a list of phones',
-        ref: new Model(type: Phone::class, groups: ['read']) 
-    )]        
+    )]
     /**
      * @param  PhoneRepository $phoneRepository
      * @param  ParamFetcherInterface $paramFetcher
@@ -69,6 +70,6 @@ class PhoneController extends AbstractFOSRestController
         $params = array_values($paramFetcher->all());
         $cacheKey = 'phones_' . md5(implode('', $params));
 
-        return $appCache->get($cacheKey, fn() => $phoneRepository->search(...$params)->getCurrentPageResults());
+        return $appCache->get($cacheKey, fn () => $phoneRepository->search(...$params)->getCurrentPageResults());
     }
 }

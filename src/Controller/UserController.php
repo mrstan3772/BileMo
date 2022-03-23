@@ -13,6 +13,7 @@ use FOS\RestBundle\View\View;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\MediaType;
+use OpenApi\Attributes\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,9 +38,9 @@ class UserController extends AbstractFOSRestController
     #[Rest\QueryParam(name: 'offset', requirements: '\d+', default: '0', description: 'The pagination offset')]
     #[Rest\View(serializerGroups: ['read'])]
     #[OA\Response(
+        // new OA\Schema(ref: new Model(type: User::class, groups: ['read'])),
         response: 200,
         description: 'Returns a list of users according to the client id',
-        ref: new Model(type: User::class, groups: ['read'])
     )]
     /**
      * @param  UserRepository $userRepository
@@ -63,9 +64,9 @@ class UserController extends AbstractFOSRestController
     #[Rest\View(serializerGroups: ['read'])]
     #[Security('is_granted("MANAGE", consumer)', message: 'You are not authorized to access this user')]
     #[OA\Response(
+        // new OA\Schema(ref: new Model(type: User::class, groups: ['read'])),
         response: 200,
         description: 'Returns the user according to his id',
-        ref: new Model(type: User::class, groups: ['read'])
     )]
     #[OA\Response(
         response: 404,
@@ -98,9 +99,9 @@ class UserController extends AbstractFOSRestController
         ]
     )]
     #[OA\Response(
+        // new OA\Schema(ref: new Model(type: User::class, groups: ['read'])),
         response: 201,
         description: 'Returns the user added',
-        ref: new Model(type: User::class, groups: ['read'])
     )]
     #[OA\Response(
         response: 403,
@@ -111,44 +112,46 @@ class UserController extends AbstractFOSRestController
         description: 'Malformed JSON or constraint validation errors',
     )]
     #[OA\RequestBody(
-        new MediaType(
-            mediaType: 'application/json',
-            schema: new OA\Schema(
-                properties: [
-                    new OA\Property(
-                        property: 'email',
-                        description: 'The user\'s email',
-                        type: 'string',
-                    ),
-                    new OA\Property(
-                        property: 'password',
-                        description: 'The user\'s password',
-                        type: 'string',
-                        format: 'password'
-                    ),
-                    new OA\Property(
-                        property: 'phoneNumber',
-                        description: 'The user\'s full phone number',
-                        type: 'int',
-                    ),
-                    new OA\Property(
-                        property: 'fullname',
-                        description: 'The user\'s full name',
-                        type: 'string',
-                    ),
-                    new OA\Property(
-                        property: 'roles',
-                        description: 'The user\'s full roles',
-                        type: 'array',
-                        items: new OA\Items(
+        description: 'User information',
+        content: [
+            new MediaType(
+                mediaType: 'application/json',
+                schema: new OA\Schema(
+                    properties: [
+                        new OA\Property(
+                            property: 'email',
+                            description: 'The user\'s email',
                             type: 'string',
-                            title: 'role'
-                        )
-                    ),
-                ]
-            ),
-        ),
-        description: 'User information"'
+                        ),
+                        new OA\Property(
+                            property: 'password',
+                            description: 'The user\'s password',
+                            type: 'string',
+                            format: 'password'
+                        ),
+                        new OA\Property(
+                            property: 'phoneNumber',
+                            description: 'The user\'s full phone number',
+                            type: 'int',
+                        ),
+                        new OA\Property(
+                            property: 'fullname',
+                            description: 'The user\'s full name',
+                            type: 'string',
+                        ),
+                        new OA\Property(
+                            property: 'roles',
+                            description: 'The user\'s full roles',
+                            type: 'array',
+                            items: new OA\Items(
+                                type: 'string',
+                                title: 'role'
+                            )
+                        ),
+                    ]
+                ),
+            )
+        ]
     )]
     public function create(EntityManagerInterface $manager, User $user, ConstraintViolationListInterface $violations, UserPasswordHasherInterface $hasher): View
     {
