@@ -42,7 +42,7 @@ Without this tool you have to replace in the terminal `symfony` with `php bin/co
 
 ### Application Environment
 
-Edit the `.env` or `.env.local` file on the root of the directory. On the example below adapt the configuration according to your credentials to `DATABASE_URL` values which concerns the SQL database.
+Edit the `.env` or `.env.local` (create if not exists) file on the root of the directory. On the example below adapt the configuration according to your credentials to `DATABASE_URL` values which concerns the SQL database.
 
 ```env
 DATABASE_URL="mysql://db_user:db_password@127.0.0.1:3306/db_name?serverVersion=x.x.x"
@@ -51,7 +51,7 @@ Found this example in the root folder under the file name [".env.example"](https
 
 ### Dependencies
 
-Use the command `composer install` **[AFTER EDITING THE .ENV FILE](https://github.com/mrstan3772/BileMo#application-configuration)** from the project root directory(BileMo). Do not answer questions if you see any during the installation (press enter to skip). Once this step is done you will have all the necessary dependencies for the main project.
+Use the command `composer install` **[AFTER EDITING THE .ENV FILE](https://github.com/mrstan3772/BileMo#application-environment)** from the project root directory(BileMo). Do not answer questions if you see any during the installation (press enter to skip). Once this step is done you will have all the necessary dependencies for the main project.
 
 ### Generate SSL Keys for JWT
 
@@ -88,7 +88,7 @@ Type this command inside the root folder(BileMo) to start running web server :
 
 `symfony serve`
 
-An address in the format 127.0.0.1:<port> is shown on the terminal.
+An address in the format `127.0.0.1:<port>` is shown on the terminal.
 
 Copy and paste this address in the navigation bar of your browser.
 
