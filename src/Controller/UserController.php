@@ -16,7 +16,9 @@ use OpenApi\Attributes\MediaType;
 use OpenApi\Attributes\Schema;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -72,13 +74,21 @@ class UserController extends AbstractFOSRestController
         response: 404,
         description: 'User not found',
     )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+    )]
     /**
      * @param  User|null $consumer
      * 
      * @return User
      */
-    public function show(User $consumer = null): User
+    public function show(Request $request, User $consumer = null): User
     {
+        if (!is_numeric($request->get('id'))) {
+            throw new BadRequestHttpException('Invalid type, the value must to be a number');
+        }
+
         if (!$consumer) {
             throw new NotFoundHttpException('The user you searched for does not exist');
         }
@@ -198,8 +208,17 @@ class UserController extends AbstractFOSRestController
         response: 403,
         description: 'Different common client or insufficient rights to delete a user',
     )]
-    public function delete(EntityManagerInterface $manager, User $consumer = null): void
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+    )]
+    public function delete(Request $request, EntityManagerInterface $manager, User $consumer = null): void
     {
+
+        if (!is_numeric($request->get('id'))) {
+            throw new BadRequestHttpException('Invalid type, the value must to be a number');
+        }
+
         if (!$consumer) {
             throw new NotFoundHttpException('The user you searched for does not exist');
         }

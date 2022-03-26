@@ -10,6 +10,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 use Nelmio\ApiDocBundle\Annotation\Model;
 use OpenApi\Attributes as OA;
 use OpenApi\Attributes\Schema;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -20,31 +22,6 @@ use Symfony\Contracts\Cache\CacheInterface;
 #[OA\Tag(name: 'Phone')]
 class PhoneController extends AbstractFOSRestController
 {
-    #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
-    #[Rest\View(serializerGroups: ['read'])]
-    #[OA\Response(
-        // new OA\Schema(ref: new Model(type: Phone::class, groups: ['read'])),
-        response: 200,
-        description: 'Returns the phone according to his id',
-    )]
-    #[OA\Response(
-        response: 404,
-        description: 'Phone not found',
-    )]
-    /**
-     * @param  Phone|null $phone
-     * 
-     * @return Phone
-     */
-    public function show(Phone $phone = null): Phone
-    {
-        if (!$phone) {
-            throw new NotFoundHttpException('The phone you searched for does not exist');
-        }
-
-        return $phone;
-    }
-
     #[Rest\Get(path: '/phones', name: 'app_phone_list')]
     #[Rest\QueryParam(name: 'keyword', requirements: '\w+', nullable: true, description: 'The name of the phone to be searched')]
     #[Rest\QueryParam(name: 'order', requirements: 'asc|desc', default: 'asc', description: 'Sort order by phone name (asc or desc)')]
@@ -71,5 +48,38 @@ class PhoneController extends AbstractFOSRestController
         $cacheKey = 'phones_' . md5(implode('', $params));
 
         return $appCache->get($cacheKey, fn () => $phoneRepository->search(...$params)->getCurrentPageResults());
+    }
+
+    #[Rest\Get(path: '/phones/{id}', name: 'app_phone_show')]
+    #[Rest\View(serializerGroups: ['read'])]
+    #[OA\Response(
+        // new OA\Schema(ref: new Model(type: Phone::class, groups: ['read'])),
+        response: 200,
+        description: 'Returns the phone according to his id',
+    )]
+    #[OA\Response(
+        response: 404,
+        description: 'Phone not found',
+    )]
+    #[OA\Response(
+        response: 400,
+        description: 'Bad Request',
+    )]
+    /**
+     * @param  Phone|null $phone
+     * 
+     * @return Phone
+     */
+    public function show(Request $request, Phone $phone = null): Phone
+    {
+        if (!is_numeric($request->get('id'))) {
+            throw new BadRequestHttpException('Invalid type, the value must to be a number');
+        }
+
+        if (!$phone) {
+            throw new NotFoundHttpException('The phone you searched for does not exist');
+        }
+
+        return $phone;
     }
 }
