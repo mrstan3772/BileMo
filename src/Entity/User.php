@@ -19,26 +19,51 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[UniqueEntity(fields: ['email'], groups: ['create'])]
-#[Hateoas\Relation(
-    'self',
-    href: new Hateoas\Route('app_phone_show', parameters: ['id" = "expr(object.getId())'], absolute: true),
-    exclusion: new Hateoas\Exclusion(groups: ['read'])
-)]
-#[Hateoas\Relation(
-    'create',
-    href: new Hateoas\Route('app_user_create', absolute: true),
-    exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
-)]
-#[Hateoas\Relation(
-    'delete',
-    href: new Hateoas\Route('app_user_delete', parameters: ['id' => 'expr(object.getId())'], absolute: true),
-    exclusion: new Hateoas\Exclusion(groups: ['read'], excludeIf: 'expr(not is_granted("ROLE_ADMIN"))')
-)]
-#[Hateoas\Relation(
-    'client',
-    embedded: new Hateoas\Embedded('expr(object.getClient())'),
-    exclusion: new Hateoas\Exclusion(groups: ['read'])
-)]
+/**
+ * @Hateoas\Relation(
+ *     "self",
+ *     href = @Hateoas\Route(
+ *         "app_user_show",
+ *         parameters = { "id" = "expr(object.getId())" },
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(
+ *         groups = { "read" }
+ *     )
+ * )
+ * @Hateoas\Relation(
+ *     "create",
+ *     href = @Hateoas\Route(
+ *         "app_user_create",
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(
+ *         groups = { "read" },
+ *         excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *     )
+ * )
+ * @Hateoas\Relation(
+ *     "delete",
+ *     href = @Hateoas\Route(
+ *         "app_user_delete",
+ *         parameters = { "id" = "expr(object.getId())" },
+ *         absolute = true
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(
+ *         groups = { "read" },
+ *         excludeIf = "expr(not is_granted('ROLE_ADMIN'))"
+ *     )
+ * )
+ * @Hateoas\Relation(
+ *     "client",
+ *     embedded = @Hateoas\Embedded(
+ *         "expr(object.getClient())"
+ *     ),
+ *     exclusion = @Hateoas\Exclusion(
+ *         groups = { "read" }
+ *     )
+ * )
+ */
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     public const ROLES = [
